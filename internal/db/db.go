@@ -7,11 +7,11 @@ import (
 
 type DbRepo struct {
 	Posts interface {
-		Create(context.Context) error
+		Create(context.Context, *PostModel) error
 	}
 
 	Users interface {
-		Create(context.Context) error
+		Create(context.Context, *UserModel) error
 	}
 }
 
