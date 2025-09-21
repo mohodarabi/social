@@ -21,7 +21,7 @@ type config struct {
 }
 
 type dbConfig struct {
-	url         string
+	url                string
 	maxOpenConnections int
 	maxIdleConnections int
 	maxIdleTime        string
@@ -42,6 +42,10 @@ func (app *application) mount() http.Handler {
 
 		route.Route("/post", func(route chi.Router) {
 			route.Post("/", app.createPostHandler)
+
+			route.Route("/{postID}", func(route chi.Router) {
+				route.Get("/", app.getPostHandler)
+			})
 		})
 	})
 
