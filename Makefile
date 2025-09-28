@@ -1,5 +1,5 @@
 MIGRATIONS_PATH = ./cmd/migrate/migrations
-DB_MIGRATOR_ADDR="postgres://admin:adminpassword@localhost/social?sslmode=disable"
+DB_MIGRATOR_ADDR="postgres://admin:adminpassword@localhost:5432/social?sslmode=disable"
 
 
 .PHONY: migrate-create

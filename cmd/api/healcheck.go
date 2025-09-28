@@ -10,6 +10,6 @@ func (app *application) healthCheckHandler(response http.ResponseWriter, request
 	}
 
 	if err := writeJson(response, http.StatusOK, data); err != nil {
-		writeJsonError(response, http.StatusInternalServerError, err.Error())
+		app.internalServerError(response, request, err)
 	}
 }

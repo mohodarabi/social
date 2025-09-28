@@ -20,7 +20,7 @@ func (app *application) createPostHandler(response http.ResponseWriter, request 
 	var payload CreatePostPayload
 
 	if err := readJson(response, request, &payload); err != nil {
-		writeJson(response, http.StatusBadRequest, err.Error())
+		app.badRequestError(response, request, err)
 		return
 	}
 
@@ -34,12 +34,12 @@ func (app *application) createPostHandler(response http.ResponseWriter, request 
 	ctx := request.Context()
 
 	if err := app.db.Posts.Create(ctx, post); err != nil {
-		writeJson(response, http.StatusBadRequest, err.Error())
+		app.badRequestError(response, request, err)
 		return
 	}
 
 	if err := writeJson(response, http.StatusCreated, post); err != nil {
-		writeJson(response, http.StatusBadRequest, err.Error())
+		app.badRequestError(response, request, err)
 		return
 	}
 
@@ -49,7 +49,7 @@ func (app *application) getPostHandler(response http.ResponseWriter, request *ht
 	idParam := chi.URLParam(request, "postID")
 	id, err := strconv.ParseInt(idParam, 10, 64)
 	if err != nil {
-		writeJson(response, http.StatusBadRequest, err.Error())
+		app.badRequestError(response, request, err)
 		return
 	}
 
@@ -60,15 +60,15 @@ func (app *application) getPostHandler(response http.ResponseWriter, request *ht
 	if err != nil {
 		switch {
 		case errors.Is(err, db.ErrNotFound):
-			writeJson(response, http.StatusNotFound, err.Error())
+			app.notFoundError(response, request, err)
 		default:
-			writeJson(response, http.StatusInternalServerError, err.Error())
+			app.internalServerError(response, request, err)
 		}
 		return
 	}
 
 	if err := writeJson(response, http.StatusCreated, post); err != nil {
-		writeJson(response, http.StatusInternalServerError, err.Error())
+		app.internalServerError(response, request, err)
 		return
 	}
 }
