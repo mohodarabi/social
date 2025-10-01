@@ -47,6 +47,14 @@ func (app *application) mount() http.Handler {
 				route.Get("/", app.getPostHandler)
 			})
 		})
+
+		route.Route("/user", func(route chi.Router) {
+			route.Post("/", app.createUserHandler)
+
+			route.Route("/{userID}", func(route chi.Router) {
+				route.Get("/", app.getUserHandler)
+			})
+		})
 	})
 
 	return router

@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"errors"
 )
 
 type UserModel struct {
@@ -40,4 +41,37 @@ func (user *UserRepo) Create(ctx context.Context, data *UserModel) error {
 
 	return nil
 
+}
+
+func (user *UserRepo) GetById(ctx context.Context, userID int64) (*UserModel, error) {
+	query := `
+		SELECT id, username, email, password, created_at, updated_at
+		FROM users 
+		WHERE id = $1
+	`
+
+	var data UserModel
+	err := user.connection.QueryRowContext(
+		ctx,
+		query,
+		userID,
+	).Scan(
+		&data.ID,
+		&data.Username,
+		&data.Email,
+		&data.Password,
+		&data.CreatedAt,
+		&data.UpdatedAt,
+	)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return &data, nil
 }

@@ -9,15 +9,15 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-type CreatePostPayload struct {
-	Title   string   `json:"title" validate:"required,max=100"`
-	Content string   `json:"content" validate:"required,max=100"`
-	Tags    []string `json:"tags"`
+type CreateUserPayload struct {
+	Username string `json:"username" validate:"required,max=100"`
+	Email    string `json:"email" validate:"required,max=100"`
+	Password string `json:"Password" validate:"required,max=100"`
 }
 
-func (app *application) createPostHandler(response http.ResponseWriter, request *http.Request) {
+func (app *application) createUserHandler(response http.ResponseWriter, request *http.Request) {
 
-	var payload CreatePostPayload
+	var payload CreateUserPayload
 
 	if err := readJson(response, request, &payload); err != nil {
 		app.badRequestError(response, request, err)
@@ -28,29 +28,28 @@ func (app *application) createPostHandler(response http.ResponseWriter, request 
 		app.badRequestError(response, request, err)
 	}
 
-	post := &db.PostModel{
-		Title:   payload.Title,
-		Content: payload.Content,
-		Tags:    payload.Tags,
-		UserID:  1,
+	user := &db.UserModel{
+		Email:    payload.Email,
+		Password: payload.Password,
+		Username: payload.Username,
 	}
 
 	ctx := request.Context()
 
-	if err := app.db.Posts.Create(ctx, post); err != nil {
+	if err := app.db.Users.Create(ctx, user); err != nil {
 		app.badRequestError(response, request, err)
 		return
 	}
 
-	if err := writeJson(response, http.StatusCreated, post); err != nil {
+	if err := writeJson(response, http.StatusCreated, user); err != nil {
 		app.badRequestError(response, request, err)
 		return
 	}
 
 }
 
-func (app *application) getPostHandler(response http.ResponseWriter, request *http.Request) {
-	idParam := chi.URLParam(request, "postID")
+func (app *application) getUserHandler(response http.ResponseWriter, request *http.Request) {
+	idParam := chi.URLParam(request, "userID")
 	id, err := strconv.ParseInt(idParam, 10, 64)
 	if err != nil {
 		app.badRequestError(response, request, err)
@@ -59,7 +58,7 @@ func (app *application) getPostHandler(response http.ResponseWriter, request *ht
 
 	ctx := request.Context()
 
-	post, err := app.db.Posts.GetById(ctx, id)
+	post, err := app.db.Users.GetById(ctx, id)
 
 	if err != nil {
 		switch {

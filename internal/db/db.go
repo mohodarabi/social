@@ -18,6 +18,7 @@ type DbRepo struct {
 
 	Users interface {
 		Create(context.Context, *UserModel) error
+		GetById(context.Context, int64) (*UserModel, error)
 	}
 }
 
