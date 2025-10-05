@@ -7,12 +7,13 @@ import (
 )
 
 type CommentModel struct {
-	ID        int64  `json:"id"`
-	PostID    string `json:"post_id"`
-	UserID    string `json:"user_id"`
-	Content   string `json:"content"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
+	ID        int64     `json:"id"`
+	PostID    string    `json:"post_id"`
+	UserID    string    `json:"user_id"`
+	Content   string    `json:"content"`
+	CreatedAt string    `json:"created_at"`
+	UpdatedAt string    `json:"updated_at"`
+	User      UserModel `json:"user"`
 }
 
 type CommentRepo struct {
@@ -74,4 +75,40 @@ func (comment *CommentRepo) GetById(ctx context.Context, commentID int64) (*Comm
 	}
 
 	return &data, nil
+}
+
+func (comment *CommentRepo) GetByPostId(ctx context.Context, postID int64) ([]CommentModel, error) {
+	query := `
+		SELECT comments.id, comments.post_id, comments.user_id, comments.content, comments.created_at, users.username, users.id FROM comments
+		JOIN users on users.id = comments.user_id
+		WHERE comments.post_id = $1
+		ORDER BY comments.created_at DESC;
+	`
+
+	rows, err := comment.connection.QueryContext(ctx, query, postID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	comments := []CommentModel{}
+	for rows.Next() {
+		var comment CommentModel
+		comment.User = UserModel{}
+		err := rows.Scan(
+			&comment.ID,
+			&comment.PostID,
+			&comment.UserID,
+			&comment.Content,
+			&comment.CreatedAt,
+			&comment.User.Username,
+			&comment.User.ID,
+		)
+		if err != nil {
+			return nil, err
+		}
+		comments = append(comments, comment)
+	}
+
+	return comments, nil
 }

@@ -24,6 +24,7 @@ type DbRepo struct {
 	Comments interface {
 		Create(context.Context, *CommentModel) error
 		GetById(context.Context, int64) (*CommentModel, error)
+		GetByPostId(context.Context, int64) ([]CommentModel, error)
 	}
 }
 
