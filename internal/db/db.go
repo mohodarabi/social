@@ -14,6 +14,8 @@ type DbRepo struct {
 	Posts interface {
 		Create(context.Context, *PostModel) error
 		GetById(context.Context, int64) (*PostModel, error)
+		DeleteById(context.Context, int64) error
+		Update(context.Context, *PostModel) error
 	}
 
 	Users interface {

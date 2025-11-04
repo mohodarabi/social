@@ -82,3 +82,57 @@ func (post *PostRepo) GetById(ctx context.Context, postID int64) (*PostModel, er
 
 	return &data, nil
 }
+
+func (post *PostRepo) Update(ctx context.Context, data *PostModel) error {
+	query := `
+		UPDATE posts
+		SET title = $1, content = $2
+		WHERE id = $3; 
+	`
+	result, err := post.connection.ExecContext(
+		ctx,
+		query,
+		data.Title,
+		data.Content,
+		data.ID,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return ErrNotFound
+	}
+
+	return nil
+}
+
+func (post *PostRepo) DeleteById(ctx context.Context, postID int64) error {
+	query := `
+		DELETE FROM posts
+		WHERE id = $1; 
+	`
+
+	result, err := post.connection.ExecContext(ctx, query, postID)
+
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return ErrNotFound
+	}
+
+	return nil
+}
