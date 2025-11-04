@@ -11,11 +11,7 @@ func (app *application) internalServerError(respone http.ResponseWriter, request
 	fmt.Printf("PATH: %s\n", request.URL.Path)
 	fmt.Printf("ERRORS: %s\n", err.Error())
 
-	errResponse := map[string]string{
-		"error": "internal server error",
-	}
-
-	writeJson(respone, http.StatusInternalServerError, errResponse)
+	writeJson(respone, http.StatusInternalServerError, "internal server error")
 }
 
 func (app *application) badRequestError(respone http.ResponseWriter, request *http.Request, err error) {
@@ -24,11 +20,7 @@ func (app *application) badRequestError(respone http.ResponseWriter, request *ht
 	fmt.Printf("PATH: %s\n", request.URL.Path)
 	fmt.Printf("ERRORS: %s\n", err.Error())
 
-	errResponse := map[string]string{
-		"error": err.Error(),
-	}
-
-	writeJson(respone, http.StatusBadRequest, errResponse)
+	writeJsonError(respone, http.StatusBadRequest, err.Error())
 }
 
 func (app *application) notFoundError(respone http.ResponseWriter, request *http.Request, err error) {
@@ -37,9 +29,5 @@ func (app *application) notFoundError(respone http.ResponseWriter, request *http
 	fmt.Printf("PATH: %s\n", request.URL.Path)
 	fmt.Printf("ERRORS: %s\n", err.Error())
 
-	errResponse := map[string]string{
-		"error": "not found",
-	}
-
-	writeJson(respone, http.StatusNotFound, errResponse)
+	writeJsonError(respone, http.StatusNotFound, "not found")
 }

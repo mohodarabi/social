@@ -22,7 +22,6 @@ type UpdatePostPayload struct {
 }
 
 type postCtxKey string
-
 const postKey postCtxKey = "post"
 
 func (app *application) createPostHandler(response http.ResponseWriter, request *http.Request) {
@@ -52,7 +51,7 @@ func (app *application) createPostHandler(response http.ResponseWriter, request 
 		return
 	}
 
-	if err := writeJson(response, http.StatusCreated, post); err != nil {
+	if err := writeJsonResponse(response, http.StatusCreated, post); err != nil {
 		app.badRequestError(response, request, err)
 		return
 	}
@@ -70,7 +69,7 @@ func (app *application) getPostHandler(response http.ResponseWriter, request *ht
 
 	post.Comments = comments
 
-	if err := writeJson(response, http.StatusCreated, post); err != nil {
+	if err := writeJsonResponse(response, http.StatusCreated, post); err != nil {
 		app.internalServerError(response, request, err)
 		return
 	}
@@ -99,7 +98,7 @@ func (app *application) deletePostHandler(response http.ResponseWriter, request 
 		return
 	}
 
-	if err := writeJson(response, http.StatusCreated, "post successfully deleted"); err != nil {
+	if err := writeJsonResponse(response, http.StatusCreated, "post successfully deleted"); err != nil {
 		app.internalServerError(response, request, err)
 		return
 	}
@@ -139,7 +138,7 @@ func (app *application) updatePostHandler(response http.ResponseWriter, request 
 		return
 	}
 
-	if err := writeJson(response, http.StatusCreated, post); err != nil {
+	if err := writeJsonResponse(response, http.StatusCreated, post); err != nil {
 		app.internalServerError(response, request, err)
 		return
 	}
