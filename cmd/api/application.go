@@ -59,7 +59,7 @@ func (app *application) mount() http.Handler {
 				route.Get("/", app.getUserHandler)
 			})
 		})
-	})
+	}) 
 
 	return router
 }

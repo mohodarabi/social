@@ -30,6 +30,10 @@ type DbRepo struct {
 		GetById(context.Context, int64) (*CommentModel, error)
 		GetByPostId(context.Context, int64) ([]CommentModel, error)
 	}
+
+	Folowers interface {
+		GetById(context.Context, int64) (*FollowerModel, error)
+	}
 }
 
 func PostgresDb(connection *sql.DB) DbRepo {
@@ -37,5 +41,6 @@ func PostgresDb(connection *sql.DB) DbRepo {
 		Posts:    &PostRepo{connection},
 		Users:    &UserRepo{connection},
 		Comments: &CommentRepo{connection},
+		Folowers: &FollowerRepo{connection},
 	}
 }
