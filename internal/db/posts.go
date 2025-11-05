@@ -16,6 +16,7 @@ type PostModel struct {
 	Tags      []string       `json:"tags"`
 	CreatedAt string         `json:"created_at"`
 	UpdatedAt string         `json:"updated_at"`
+	Version   int            `json:"version"`
 	Comments  []CommentModel `json:"comments"`
 }
 
@@ -51,7 +52,7 @@ func (post *PostRepo) Create(ctx context.Context, data *PostModel) error {
 
 func (post *PostRepo) GetById(ctx context.Context, postID int64) (*PostModel, error) {
 	query := `
-		SELECT id, user_id, title, content, created_at, updated_at, tags
+		SELECT id, user_id, title, content, created_at, updated_at, tags, version
 		FROM posts 
 		WHERE id = $1
 	`
@@ -69,6 +70,7 @@ func (post *PostRepo) GetById(ctx context.Context, postID int64) (*PostModel, er
 		&data.CreatedAt,
 		&data.UpdatedAt,
 		pq.Array(&data.Tags),
+		&data.Version,
 	)
 
 	if err != nil {
@@ -86,28 +88,28 @@ func (post *PostRepo) GetById(ctx context.Context, postID int64) (*PostModel, er
 func (post *PostRepo) Update(ctx context.Context, data *PostModel) error {
 	query := `
 		UPDATE posts
-		SET title = $1, content = $2
-		WHERE id = $3; 
+		SET title = $1, content = $2, version = version + 1
+		WHERE id = $3 AND version = $4; 
+		RETURNING version
 	`
-	result, err := post.connection.ExecContext(
+	err := post.connection.QueryRowContext(
 		ctx,
 		query,
 		data.Title,
 		data.Content,
 		data.ID,
+		data.Version,
+	).Scan(
+		&data.Version,
 	)
 
 	if err != nil {
-		return err
-	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if rowsAffected == 0 {
-		return ErrNotFound
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return ErrNotFound
+		default:
+			return err
+		}
 	}
 
 	return nil
