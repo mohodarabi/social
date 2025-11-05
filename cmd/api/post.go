@@ -22,6 +22,7 @@ type UpdatePostPayload struct {
 }
 
 type postCtxKey string
+
 const postKey postCtxKey = "post"
 
 func (app *application) createPostHandler(response http.ResponseWriter, request *http.Request) {
