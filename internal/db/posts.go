@@ -29,6 +29,9 @@ func (post *PostRepo) Create(ctx context.Context, data *PostModel) error {
 		INSERT INTO posts (content, title, user_id, tags) VALUES ($1, $2, $3, $4) RETURNING id, created_at, updated_at
 	`
 
+	ctx, cancle := context.WithTimeout(ctx, QueryTimeOutSecond)
+	defer cancle()
+
 	err := post.connection.QueryRowContext(
 		ctx,
 		query,
@@ -56,6 +59,9 @@ func (post *PostRepo) GetById(ctx context.Context, postID int64) (*PostModel, er
 		FROM posts 
 		WHERE id = $1
 	`
+
+	ctx, cancle := context.WithTimeout(ctx, QueryTimeOutSecond)
+	defer cancle()
 
 	var data PostModel
 	err := post.connection.QueryRowContext(
@@ -92,6 +98,10 @@ func (post *PostRepo) Update(ctx context.Context, data *PostModel) error {
 		WHERE id = $3 AND version = $4; 
 		RETURNING version
 	`
+
+	ctx, cancle := context.WithTimeout(ctx, QueryTimeOutSecond)
+	defer cancle()
+
 	err := post.connection.QueryRowContext(
 		ctx,
 		query,
@@ -120,6 +130,9 @@ func (post *PostRepo) DeleteById(ctx context.Context, postID int64) error {
 		DELETE FROM posts
 		WHERE id = $1; 
 	`
+
+	ctx, cancle := context.WithTimeout(ctx, QueryTimeOutSecond)
+	defer cancle()
 
 	result, err := post.connection.ExecContext(ctx, query, postID)
 

@@ -21,10 +21,12 @@ type CommentRepo struct {
 }
 
 func (comment *CommentRepo) Create(ctx context.Context, data *CommentModel) error {
-
 	query := `
 		INSERT INTO comments (post_id, user_id, content) VALUES ($1, $2, $3) RETURNING id
 	`
+
+	ctx, cancle := context.WithTimeout(ctx, QueryTimeOutSecond)
+	defer cancle()
 
 	err := comment.connection.QueryRowContext(
 		ctx,
@@ -50,6 +52,9 @@ func (comment *CommentRepo) GetById(ctx context.Context, commentID int64) (*Comm
 		FROM comments 
 		WHERE id = $1
 	`
+
+	ctx, cancle := context.WithTimeout(ctx, QueryTimeOutSecond)
+	defer cancle()
 
 	var data CommentModel
 	err := comment.connection.QueryRowContext(
@@ -84,6 +89,9 @@ func (comment *CommentRepo) GetByPostId(ctx context.Context, postID int64) ([]Co
 		WHERE comments.post_id = $1
 		ORDER BY comments.created_at DESC;
 	`
+
+	ctx, cancle := context.WithTimeout(ctx, QueryTimeOutSecond)
+	defer cancle()
 
 	rows, err := comment.connection.QueryContext(ctx, query, postID)
 	if err != nil {

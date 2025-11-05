@@ -4,10 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
 )
 
 var (
-	ErrNotFound = errors.New("record not found")
+	ErrNotFound        = errors.New("record not found")
+	QueryTimeOutSecond = time.Second * 5
 )
 
 type DbRepo struct {

@@ -20,10 +20,12 @@ type UserRepo struct {
 }
 
 func (user *UserRepo) Create(ctx context.Context, data *UserModel) error {
-
 	query := `
 		INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id
 	`
+
+	ctx, cancle := context.WithTimeout(ctx, QueryTimeOutSecond)
+	defer cancle()
 
 	err := user.connection.QueryRowContext(
 		ctx,
@@ -49,6 +51,9 @@ func (user *UserRepo) GetById(ctx context.Context, userID int64) (*UserModel, er
 		FROM users 
 		WHERE id = $1
 	`
+
+	ctx, cancle := context.WithTimeout(ctx, QueryTimeOutSecond)
+	defer cancle()
 
 	var data UserModel
 	err := user.connection.QueryRowContext(
