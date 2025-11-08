@@ -56,10 +56,14 @@ func (app *application) mount() http.Handler {
 			route.Post("/", app.createUserHandler)
 
 			route.Route("/{userID}", func(route chi.Router) {
+				route.Use(app.userContentMiddleware)
+
 				route.Get("/", app.getUserHandler)
+				route.Put("/follow", app.followUserHandler)
+				route.Put("/unfollow", app.unfollowUserHandler)
 			})
 		})
-	}) 
+	})
 
 	return router
 }
