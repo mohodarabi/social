@@ -53,6 +53,7 @@ func (app *application) mount() http.Handler {
 		})
 
 		route.Route("/user", func(route chi.Router) {
+
 			route.Post("/", app.createUserHandler)
 
 			route.Route("/{userID}", func(route chi.Router) {

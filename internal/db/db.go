@@ -32,7 +32,8 @@ type DbRepo struct {
 	}
 
 	Folowers interface {
-		GetById(context.Context, int64) (*FollowerModel, error)
+		Follow(ctx context.Context, followerID, userID int64) error
+		UnFollow(ctx context.Context, followerID, userID int64) error
 	}
 }
 

@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"database/sql"
-	"errors"
 )
 
 type FollowerModel struct {
@@ -18,37 +17,66 @@ type FollowerRepo struct {
 	connection *sql.DB
 }
 
-func (follower *FollowerRepo) GetById(ctx context.Context, userID int64) (*FollowerModel, error) {
+func (follower *FollowerRepo) Follow(ctx context.Context, followerID int64, userID int64) error {
 	query := `
-		SELECT id, user_id, follower_id, created_at, updated_at
-		FROM followers 
-		WHERE id = $1
+		INSERT INTO followers (user_id, follower_id)
+		VALUES ($1, $2); 
 	`
 
 	ctx, cancle := context.WithTimeout(ctx, QueryTimeOutSecond)
 	defer cancle()
 
-	var data FollowerModel
-	err := follower.connection.QueryRowContext(
+	result, err := follower.connection.ExecContext(
 		ctx,
 		query,
 		userID,
-	).Scan(
-		&data.ID,
-		&data.UserID,
-		&data.FollowerID,
-		&data.CreatedAt,
-		&data.UpdatedAt,
+		followerID,
 	)
 
 	if err != nil {
-		switch {
-		case errors.Is(err, sql.ErrNoRows):
-			return nil, ErrNotFound
-		default:
-			return nil, err
-		}
+		return err
 	}
 
-	return &data, nil
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return ErrNotFound
+	}
+
+	return nil
+}
+
+func (follower *FollowerRepo) UnFollow(ctx context.Context, followerID int64, userID int64) error {
+	query := `
+		INSERT INTO followers (user_id, follower_id)
+		VALUES ($1, $2); 
+	`
+
+	ctx, cancle := context.WithTimeout(ctx, QueryTimeOutSecond)
+	defer cancle()
+
+	result, err := follower.connection.ExecContext(
+		ctx,
+		query,
+		userID,
+		followerID,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return ErrNotFound
+	}
+
+	return nil
 }

@@ -21,13 +21,8 @@ type CreateUserPayload struct {
 	Password string `json:"Password" validate:"required,max=100"`
 }
 
-type RequestWithUserId struct {
-	UserID string `json:"userId" validate:"required,max=100"`
-}
-
 type FollowUserPayload struct {
-	UserID   string `json:"userId" validate:"required,max=100"`
-	FollowID string `json:"followId" validate:"required,max=100"`
+	UserID int64 `json:"userId" validate:"required,max=100"`
 }
 
 func (app *application) createUserHandler(response http.ResponseWriter, request *http.Request) {
@@ -72,10 +67,37 @@ func (app *application) getUserHandler(response http.ResponseWriter, request *ht
 }
 
 func (app *application) followUserHandler(response http.ResponseWriter, request *http.Request) {
-	user := getUserFromCtx(*request)
-	fmt.Println(user)
+	followerId := getUserFromCtx(*request)
 
-	if err := writeJson(response, http.StatusNoContent, nil); err != nil {
+	var payload FollowUserPayload
+
+	if err := readJson(response, request, &payload); err != nil {
+		app.badRequestError(response, request, err)
+		return
+	}
+
+	if err := Validate.Struct(payload); err != nil {
+		app.badRequestError(response, request, err)
+		return
+	}
+
+	err := app.db.Folowers.Follow(request.Context(), followerId.ID, payload.UserID)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, db.ErrNotFound):
+			app.notFoundError(response, request, err)
+		default:
+			app.internalServerError(response, request, err)
+		}
+		return
+	}
+
+	responseDate := map[string]string{
+		"message": "successfully added",
+	}
+
+	if err := writeJson(response, http.StatusOK, responseDate); err != nil {
 		app.internalServerError(response, request, err)
 		return
 	}
