@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"social/internal/db"
 	"strconv"
@@ -67,7 +66,7 @@ func (app *application) getUserHandler(response http.ResponseWriter, request *ht
 }
 
 func (app *application) followUserHandler(response http.ResponseWriter, request *http.Request) {
-	followerId := getUserFromCtx(*request)
+	follower := getUserFromCtx(*request)
 
 	var payload FollowUserPayload
 
@@ -81,7 +80,7 @@ func (app *application) followUserHandler(response http.ResponseWriter, request 
 		return
 	}
 
-	err := app.db.Folowers.Follow(request.Context(), followerId.ID, payload.UserID)
+	err := app.db.Folowers.Follow(request.Context(), follower.ID, payload.UserID)
 
 	if err != nil {
 		switch {
@@ -106,10 +105,34 @@ func (app *application) followUserHandler(response http.ResponseWriter, request 
 }
 
 func (app *application) unfollowUserHandler(response http.ResponseWriter, request *http.Request) {
-	user := getUserFromCtx(*request)
-	fmt.Println(user)
+	follower := getUserFromCtx(*request)
 
-	if err := writeJson(response, http.StatusNoContent, nil); err != nil {
+	var payload FollowUserPayload
+
+	if err := readJson(response, request, &payload); err != nil {
+		app.badRequestError(response, request, err)
+		return
+	}
+
+	err := app.db.Folowers.UnFollow(request.Context(), follower.ID, payload.UserID)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, db.ErrNotFound):
+			app.notFoundError(response, request, err)
+		case errors.Is(err, db.ErrUserAlreadyFollowed):
+			app.badRequestError(response, request, err)
+		default:
+			app.internalServerError(response, request, err)
+		}
+		return
+	}
+
+	responseDate := map[string]string{
+		"message": "successfully added",
+	}
+
+	if err := writeJson(response, http.StatusOK, responseDate); err != nil {
 		app.internalServerError(response, request, err)
 		return
 	}

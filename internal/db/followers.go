@@ -52,9 +52,7 @@ func (follower *FollowerRepo) Follow(ctx context.Context, followerID int64, user
 
 func (follower *FollowerRepo) UnFollow(ctx context.Context, followerID int64, userID int64) error {
 	query := `
-		INSERT INTO followers (user_id, follower_id)
-		VALUES ($1, $2)
-		ON CONFLICT DO NOTHING;
+		DELETE FROM followers WHERE user_id = $1 AND follower_id = $2;
 	`
 
 	ctx, cancle := context.WithTimeout(ctx, QueryTimeOutSecond)
