@@ -87,6 +87,8 @@ func (app *application) followUserHandler(response http.ResponseWriter, request 
 		switch {
 		case errors.Is(err, db.ErrNotFound):
 			app.notFoundError(response, request, err)
+		case errors.Is(err, db.ErrUserAlreadyFollowed):
+			app.badRequestError(response, request, err)
 		default:
 			app.internalServerError(response, request, err)
 		}

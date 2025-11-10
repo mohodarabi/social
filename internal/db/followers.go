@@ -20,7 +20,8 @@ type FollowerRepo struct {
 func (follower *FollowerRepo) Follow(ctx context.Context, followerID int64, userID int64) error {
 	query := `
 		INSERT INTO followers (user_id, follower_id)
-		VALUES ($1, $2); 
+		VALUES ($1, $2)
+		ON CONFLICT DO NOTHING;
 	`
 
 	ctx, cancle := context.WithTimeout(ctx, QueryTimeOutSecond)
@@ -43,7 +44,7 @@ func (follower *FollowerRepo) Follow(ctx context.Context, followerID int64, user
 	}
 
 	if rowsAffected == 0 {
-		return ErrNotFound
+		return ErrUserAlreadyFollowed
 	}
 
 	return nil
@@ -52,7 +53,8 @@ func (follower *FollowerRepo) Follow(ctx context.Context, followerID int64, user
 func (follower *FollowerRepo) UnFollow(ctx context.Context, followerID int64, userID int64) error {
 	query := `
 		INSERT INTO followers (user_id, follower_id)
-		VALUES ($1, $2); 
+		VALUES ($1, $2)
+		ON CONFLICT DO NOTHING;
 	`
 
 	ctx, cancle := context.WithTimeout(ctx, QueryTimeOutSecond)

@@ -8,8 +8,9 @@ import (
 )
 
 var (
-	ErrNotFound        = errors.New("record not found")
-	QueryTimeOutSecond = time.Second * 5
+	ErrNotFound            = errors.New("record not found")
+	ErrUserAlreadyFollowed = errors.New("user already followed")
+	QueryTimeOutSecond     = time.Second * 5
 )
 
 type DbRepo struct {
