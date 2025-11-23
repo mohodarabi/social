@@ -30,7 +30,7 @@ type PostRepo struct {
 	connection *sql.DB
 }
 
-func (post *PostRepo) GetUserFeed(ctx context.Context, userID int64) ([]PostWithMetadata, error) {
+func (post *PostRepo) GetUserFeed(ctx context.Context, userID int64, feedQuery PagnaitedFeedQuery) ([]PostWithMetadata, error) {
 	query := `
 		SELECT
 			p.id, p.user_id, p.title, p.content, p.created_at, p.version, p.tags
@@ -42,7 +42,8 @@ func (post *PostRepo) GetUserFeed(ctx context.Context, userID int64) ([]PostWith
 		JOIN followers f ON follower_id = p.user_id OR p.user_id = $1
 		WHERE f.user_id = $1 or p.user_id  = $1
 		GROUP BY p.id, u.username
-		ORDER BY p.created_at DESC
+		ORDER BY ` + feedQuery.Sort + `
+		LIMIT $2 OFFSET $3
 	`
 
 	ctx, cancle := context.WithTimeout(ctx, QueryTimeOutSecond)
@@ -52,6 +53,8 @@ func (post *PostRepo) GetUserFeed(ctx context.Context, userID int64) ([]PostWith
 		ctx,
 		query,
 		userID,
+		feedQuery.Limit,
+		feedQuery.Offset,
 	)
 
 	if err != nil {

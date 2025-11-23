@@ -19,7 +19,7 @@ type DbRepo struct {
 		GetById(context.Context, int64) (*PostModel, error)
 		DeleteById(context.Context, int64) error
 		Update(context.Context, *PostModel) error
-		GetUserFeed(context.Context, int64) ([]PostWithMetadata, error)
+		GetUserFeed(context.Context, int64, PagnaitedFeedQuery) ([]PostWithMetadata, error)
 	}
 
 	Users interface {
