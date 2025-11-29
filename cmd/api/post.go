@@ -105,7 +105,7 @@ func (app *application) deletePostHandler(response http.ResponseWriter, request 
 	}
 }
 
-func (app *application) updatePostHandler(response http.ResponseWriter, request *http.Request) { 
+func (app *application) updatePostHandler(response http.ResponseWriter, request *http.Request) {
 	post := getPostFromCtx(*request)
 
 	var payload UpdatePostPayload
