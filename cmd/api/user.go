@@ -57,6 +57,19 @@ func (app *application) createUserHandler(response http.ResponseWriter, request 
 
 }
 
+// GetUser godoc
+//
+//	@Summary		get user
+//	@Description	get user by id, id should send in params
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		int	true	"userID"
+//	@Success		200	{object}	db.UserModel
+//	@Failure		400	{object}	error
+//	@Failure		404	{object}	error
+//	@Failure		500	{object}	error
+//	@Router			/users/{id} [get]
 func (app *application) getUserHandler(response http.ResponseWriter, request *http.Request) {
 	user := getUserFromCtx(*request)
 	if err := writeJson(response, http.StatusOK, user); err != nil {
