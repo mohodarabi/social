@@ -1,9 +1,10 @@
 package main
 
 import (
-	"log"
 	"social/internal/db"
 	"social/internal/env"
+
+	"go.uber.org/zap"
 )
 
 //	@title			Swagger Example API
@@ -39,6 +40,9 @@ func main() {
 		},
 	}
 
+	logger := zap.Must(zap.NewProduction()).Sugar()
+	defer logger.Sync()
+
 	conntection, err := db.CreateDbConnection(
 		config.dbConfig.url,
 		config.dbConfig.maxOpenConnections,
@@ -47,22 +51,23 @@ func main() {
 	)
 
 	if err != nil {
-		log.Panic(err)
+		logger.Fatal(err)
 	}
 
 	defer conntection.Close()
 
-	log.Println("database connection pool established")
+	logger.Info("database connection pool established")
 
 	postgresDb := db.PostgresDb(conntection)
 
 	app := &application{
 		config: config,
 		db:     postgresDb,
+		logger: logger,
 	}
 
 	mux := app.mount()
 
-	log.Fatal(app.run(mux))
+	logger.Fatal(app.run(mux))
 
 }
