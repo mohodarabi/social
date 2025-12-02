@@ -75,7 +75,7 @@ func (app *application) mount() http.Handler {
 			})
 
 			route.Group(func(r chi.Router) {
-				route.Get("/feed", app.getUserFeedHandler)
+				r.Get("/feed", app.getUserFeedHandler)
 			})
 		})
 	})
