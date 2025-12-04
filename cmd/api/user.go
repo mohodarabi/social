@@ -150,3 +150,43 @@ func getUserFromCtx(request http.Request) *db.UserModel {
 	user, _ := request.Context().Value(userKey).(*db.UserModel)
 	return user
 }
+
+// UserActivation godoc
+//
+//	@Summary		activation user
+//	@Description	activation user
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			token	path		string	true	"Invitation token"
+//	@Success		200		{object}	db.UserModel
+//	@Failure		400		{object}	error
+//	@Failure		404		{object}	error
+//	@Failure		500		{object}	error
+//	@Router			/user/activattion/{token} [put]
+func (app *application) activeUserHandler(response http.ResponseWriter, request *http.Request) {
+	token := chi.URLParam(request, "token")
+
+	ctx := request.Context()
+
+	err := app.db.Users.Activate(ctx, token)
+
+	if err != nil {
+		switch err {
+		case db.ErrNotFound:
+			app.badRequestError(response, request, err)
+		default:
+			app.internalServerError(response, request, err)
+		}
+		return
+	}
+
+	responseData := map[string]string{
+		"message": "user successfully activated",
+	}
+
+	if err := writeJson(response, http.StatusOK, responseData); err != nil {
+		app.internalServerError(response, request, err)
+		return
+	}
+}

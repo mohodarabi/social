@@ -15,6 +15,11 @@ type UserAuthenticate struct {
 	Password string `json:"password" validate:"required,max=20"`
 }
 
+type UserWithToken struct {
+	User  *db.UserModel
+	Token string `json:"token"`
+}
+
 // CreateUser godoc
 //
 //	@Summary		create user and invitation
@@ -73,11 +78,12 @@ func (app *application) authHandler(response http.ResponseWriter, request *http.
 		}
 	}
 
-	responseDate := map[string]string{
-		"message": "successfully created",
+	userWithToken := UserWithToken{
+		User:  user,
+		Token: plainToken,
 	}
 
-	if err := writeJson(response, http.StatusOK, responseDate); err != nil {
+	if err := writeJson(response, http.StatusOK, userWithToken); err != nil {
 		app.internalServerError(response, request, err)
 		return
 	}

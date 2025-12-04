@@ -71,6 +71,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/activattion/{token}": {
+            "put": {
+                "description": "activation user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "activation user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Invitation token",
+                        "name": "token",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/db.UserModel"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/users/{id}": {
             "get": {
                 "description": "get user by id, id should send in params",
@@ -128,6 +172,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "is_active": {
+                    "type": "boolean"
                 },
                 "passowrd": {
                     "$ref": "#/definitions/db.password"

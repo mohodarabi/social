@@ -26,6 +26,7 @@ type DbRepo struct {
 		Create(context.Context, *sql.Tx, *UserModel) error
 		GetById(context.Context, int64) (*UserModel, error)
 		CreateAndInvite(context.Context, *UserModel, string, time.Duration) error
+		Activate(context.Context, string) error
 	}
 
 	Comments interface {

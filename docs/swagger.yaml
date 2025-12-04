@@ -8,6 +8,8 @@ definitions:
         type: string
       id:
         type: integer
+      is_active:
+        type: boolean
       passowrd:
         $ref: '#/definitions/db.password'
       updated_at:
@@ -75,6 +77,36 @@ paths:
           description: Internal Server Error
           schema: {}
       summary: create user and invitation
+      tags:
+      - users
+  /user/activattion/{token}:
+    put:
+      consumes:
+      - application/json
+      description: activation user
+      parameters:
+      - description: Invitation token
+        in: path
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/db.UserModel'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: activation user
       tags:
       - users
   /users/{id}:

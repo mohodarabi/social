@@ -2,7 +2,9 @@ package db
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
 	"errors"
 	"time"
 
@@ -21,6 +23,7 @@ type UserModel struct {
 	Password  password `json:"passowrd"`
 	CreatedAt string   `json:"created_at"`
 	UpdatedAt string   `json:"updated_at"`
+	IsAcitve  bool     `json:"is_active"`
 }
 
 type UserRepo struct {
@@ -149,4 +152,112 @@ func (user *UserRepo) CreateUserInvitation(ctx context.Context, tx *sql.Tx, user
 
 	return nil
 
+}
+
+func (user *UserRepo) Activate(ctx context.Context, token string) error {
+	return WithTx(user.connection, ctx, func(tx *sql.Tx) error {
+
+		userData, err := user.getUserFromInvitation(ctx, tx, token)
+		if err != nil {
+			return err
+		}
+
+		userData.IsAcitve = true
+
+		if err := user.update(ctx, tx, userData); err != nil {
+			return err
+		}
+
+		if err := user.dateUserInvitation(ctx, tx, userData.ID); err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
+func (user *UserRepo) update(ctx context.Context, tx *sql.Tx, userData *UserModel) error {
+	query := `
+		UPDATE users SET username = $1, email = $2, is_active = $3 WHERE id = $4
+	`
+
+	ctx, cancle := context.WithTimeout(ctx, QueryTimeOutSecond)
+	defer cancle()
+
+	_, err := tx.ExecContext(
+		ctx,
+		query,
+		userData.Username,
+		userData.Email,
+		userData.IsAcitve,
+		userData.ID,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (user *UserRepo) getUserFromInvitation(ctx context.Context, tx *sql.Tx, token string) (*UserModel, error) {
+	query := `
+		SELECT u.id, u.username, u.email, u.created_at, u.is_active 
+		FROM users u
+		JOIN user_invitations ui on u.id = ui.user_id
+		WHERE ui.token = $1 AND ui.exptime > $2
+	`
+
+	hash := sha256.Sum256([]byte(token))
+	hashToken := hex.EncodeToString(hash[:])
+
+	ctx, cancle := context.WithTimeout(ctx, QueryTimeOutSecond)
+	defer cancle()
+
+	userData := &UserModel{}
+
+	err := tx.QueryRowContext(
+		ctx,
+		query,
+		hashToken,
+		time.Now(),
+	).Scan(
+		&userData.ID,
+		&userData.Username,
+		&userData.Email,
+		&userData.CreatedAt,
+		&userData.IsAcitve,
+	)
+
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return nil, ErrNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return userData, nil
+}
+
+func (user *UserRepo) dateUserInvitation(ctx context.Context, tx *sql.Tx, userID int64) error {
+	query := `
+		DELETE FROM user_invitations WHERE user_id = $1
+	`
+
+	ctx, cancle := context.WithTimeout(ctx, QueryTimeOutSecond)
+	defer cancle()
+
+	_, err := tx.ExecContext(
+		ctx,
+		query,
+		userID,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

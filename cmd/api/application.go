@@ -68,6 +68,7 @@ func (app *application) mount() http.Handler {
 		})
 
 		route.Route("/user", func(route chi.Router) {
+			route.Put("/activattion/{token}", app.activeUserHandler)
 
 			route.Route("/{userID}", func(route chi.Router) {
 				route.Use(app.userContentMiddleware)
