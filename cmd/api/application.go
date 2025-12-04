@@ -22,6 +22,11 @@ type application struct {
 type config struct {
 	address  string
 	dbConfig dbConfig
+	mail     mailConfig
+}
+
+type mailConfig struct {
+	expTime time.Duration
 }
 
 type dbConfig struct {
@@ -64,8 +69,6 @@ func (app *application) mount() http.Handler {
 
 		route.Route("/user", func(route chi.Router) {
 
-			route.Post("/", app.createUserHandler)
-
 			route.Route("/{userID}", func(route chi.Router) {
 				route.Use(app.userContentMiddleware)
 
@@ -77,6 +80,10 @@ func (app *application) mount() http.Handler {
 			route.Group(func(r chi.Router) {
 				r.Get("/feed", app.getUserFeedHandler)
 			})
+		})
+
+		route.Route("/auth", func(route chi.Router) {
+			route.Post("/user", app.authHandler)
 		})
 	})
 

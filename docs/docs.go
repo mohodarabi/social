@@ -24,6 +24,53 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/user": {
+            "post": {
+                "description": "create user and invitation",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "create user and invitation",
+                "parameters": [
+                    {
+                        "description": "User authentication payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.UserAuthenticate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/users/{id}": {
             "get": {
                 "description": "get user by id, id should send in params",
@@ -83,13 +130,37 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "passowrd": {
-                    "type": "string"
+                    "$ref": "#/definitions/db.password"
                 },
                 "updated_at": {
                     "type": "string"
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "db.password": {
+            "type": "object"
+        },
+        "main.UserAuthenticate": {
+            "type": "object",
+            "required": [
+                "email",
+                "password",
+                "username"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 20
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 100
                 }
             }
         }

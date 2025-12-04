@@ -9,11 +9,28 @@ definitions:
       id:
         type: integer
       passowrd:
-        type: string
+        $ref: '#/definitions/db.password'
       updated_at:
         type: string
       username:
         type: string
+    type: object
+  db.password:
+    type: object
+  main.UserAuthenticate:
+    properties:
+      email:
+        type: string
+      password:
+        maxLength: 20
+        type: string
+      username:
+        maxLength: 100
+        type: string
+    required:
+    - email
+    - password
+    - username
     type: object
 info:
   contact:
@@ -28,6 +45,38 @@ info:
   title: Swagger Example API
   version: "1.0"
 paths:
+  /auth/user:
+    post:
+      consumes:
+      - application/json
+      description: create user and invitation
+      parameters:
+      - description: User authentication payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/main.UserAuthenticate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: create user and invitation
+      tags:
+      - users
   /users/{id}:
     get:
       consumes:

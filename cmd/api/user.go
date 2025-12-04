@@ -24,39 +24,6 @@ type FollowUserPayload struct {
 	UserID int64 `json:"userId" validate:"required,max=100"`
 }
 
-func (app *application) createUserHandler(response http.ResponseWriter, request *http.Request) {
-
-	var payload CreateUserPayload
-
-	if err := readJson(response, request, &payload); err != nil {
-		app.badRequestError(response, request, err)
-		return
-	}
-
-	if err := Validate.Struct(payload); err != nil {
-		app.badRequestError(response, request, err)
-	}
-
-	user := &db.UserModel{
-		Email:    payload.Email,
-		Password: payload.Password,
-		Username: payload.Username,
-	}
-
-	ctx := request.Context()
-
-	if err := app.db.Users.Create(ctx, user); err != nil {
-		app.badRequestError(response, request, err)
-		return
-	}
-
-	if err := writeJson(response, http.StatusCreated, user); err != nil {
-		app.badRequestError(response, request, err)
-		return
-	}
-
-}
-
 // GetUser godoc
 //
 //	@Summary		get user

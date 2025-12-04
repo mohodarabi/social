@@ -23,8 +23,9 @@ type DbRepo struct {
 	}
 
 	Users interface {
-		Create(context.Context, *UserModel) error
+		Create(context.Context, *sql.Tx, *UserModel) error
 		GetById(context.Context, int64) (*UserModel, error)
+		CreateAndInvite(context.Context, *UserModel, string, time.Duration) error
 	}
 
 	Comments interface {
@@ -46,4 +47,19 @@ func PostgresDb(connection *sql.DB) DbRepo {
 		Comments: &CommentRepo{connection},
 		Folowers: &FollowerRepo{connection},
 	}
+}
+
+func WithTx(db *sql.DB, ctx context.Context, fn func(*sql.Tx) error) error {
+	tx, err := db.BeginTx(ctx, nil)
+
+	if err != nil {
+		return nil
+	}
+
+	if err := fn(tx); err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
 }

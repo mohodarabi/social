@@ -3,6 +3,7 @@ package main
 import (
 	"social/internal/db"
 	"social/internal/env"
+	"time"
 
 	"go.uber.org/zap"
 )
@@ -37,6 +38,9 @@ func main() {
 			maxIdleConnections: env.GetEnvAsInt("DB_MAX_IDLE_CONNECTIONS", 30),
 			maxIdleTime:        env.GetEnvAsSting("DB_MAX_IDLE_TIME", "15m"),
 			apiUrl:             env.GetEnvAsSting("EXTERNAL_URL", "localhost:8080"),
+		},
+		mail: mailConfig{
+			expTime: time.Hour * 24 * 3,
 		},
 	}
 

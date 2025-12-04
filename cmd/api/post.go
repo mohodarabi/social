@@ -36,6 +36,7 @@ func (app *application) createPostHandler(response http.ResponseWriter, request 
 
 	if err := Validate.Struct(payload); err != nil {
 		app.badRequestError(response, request, err)
+		return
 	}
 
 	post := &db.PostModel{
